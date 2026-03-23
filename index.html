@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriBot — Nutricionista no WhatsApp</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #0d1b2a; color: #e8e8e8; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+
+.api-box { width: 100%; max-width: 480px; background: #1a2a1a; border: 2px solid #25D366; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+.api-box h2 { font-family: 'Syne', sans-serif; color: #25D366; font-size: 16px; margin-bottom: 6px; }
+.api-box p { color: #8696a0; font-size: 12px; margin-bottom: 14px; }
+.api-row { display: flex; gap: 8px; }
+.api-input { flex: 1; background: #0d1b2a; border: 1px solid #25D366; border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 13px; font-family: monospace; outline: none; }
+.api-input::placeholder { color: rgba(255,255,255,0.3); }
+.api-btn { background: #25D366; border: none; border-radius: 10px; padding: 12px 20px; color: #000; font-weight: 700; font-size: 14px; cursor: pointer; }
+.api-status { margin-top: 10px; font-size: 12px; color: #8696a0; text-align: center; }
+.api-status.ok { color: #25D366; }
+
+.hero { text-align: center; max-width: 480px; margin-bottom: 20px; }
+.badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.3); border-radius: 100px; padding: 6px 16px; font-size: 12px; color: #25D366; margin-bottom: 14px; }
+.dot { width: 8px; height: 8px; background: #25D366; border-radius: 50%; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+h1 { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem,5vw,2.8rem); font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 10px; }
+h1 span { color: #25D366; }
+.sub { color: #8696a0; font-size: 14px; line-height: 1.6; }
+
+.phone-wrap { width: 100%; max-width: 380px; margin-bottom: 20px; }
+.phone { background: #0a1628; border-radius: 20px; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.07); box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; }
+.wa-header { background: #1f2c34; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+.avatar { width: 38px; height: 38px; background: linear-gradient(135deg,#128C7E,#25D366); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.contact-name { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: 14px; }
+.contact-status { font-size: 11px; color: #25D366; }
+
+.chat { padding: 10px; min-height: 380px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; background: #0a1628; }
+.chat::-webkit-scrollbar { width: 3px; }
+.chat::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+.date-div { text-align: center; margin: 4px 0; }
+.date-div span { background: rgba(255,255,255,0.07); color: #8696a0; font-size: 11px; padding: 3px 10px; border-radius: 8px; }
+.row { display: flex; flex-direction: column; }
+.row.out { align-items: flex-end; }
+.row.in { align-items: flex-start; }
+.bubble { max-width: 82%; padding: 8px 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+.bubble.out { background: #005C4B; color: #e8e8e8; border-bottom-right-radius: 3px; }
+.bubble.in { background: #1e2d3d; color: #e8e8e8; border-bottom-left-radius: 3px; }
+.btime { font-size: 10px; color: rgba(255,255,255,0.35); text-align: right; margin-top: 2px; }
+.img-bub { width: 190px; border-radius: 12px; overflow: hidden; }
+.img-bub img { width: 100%; display: block; }
+.img-cap { padding: 5px 10px; font-size: 11px; color: #8696a0; background: #1e2d3d; }
+
+.card { background: rgba(0,0,0,0.3); border: 1px solid rgba(37,211,102,0.25); border-radius: 10px; padding: 12px; max-width: 88%; }
+.card-title { font-family: 'Syne', sans-serif; font-weight: 700; color: #25D366; font-size: 12px; margin-bottom: 10px; }
+.cal-box { background: rgba(0,230,118,0.08); border: 1px solid rgba(0,230,118,0.2); border-radius: 8px; text-align: center; padding: 10px; margin-bottom: 10px; }
+.cal-num { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: #00e676; }
+.cal-lbl { font-size: 10px; color: #8696a0; }
+.macros { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+.mac { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 8px; text-align: center; }
+.mac-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; line-height: 1; }
+.mac-lbl { font-size: 10px; color: #8696a0; margin-top: 2px; }
+.items { font-size: 11px; color: #8696a0; line-height: 1.8; margin-bottom: 8px; }
+.items strong { color: #ccc; }
+.tip { background: rgba(255,107,53,0.08); border-left: 3px solid #FF6B35; border-radius: 0 6px 6px 0; padding: 7px 10px; font-size: 11px; color: #ccc; }
+
+.typing { display: flex; gap: 4px; padding: 10px 14px; background: #1e2d3d; border-radius: 12px; border-bottom-left-radius: 3px; width: fit-content; }
+.typing span { width: 7px; height: 7px; background: #8696a0; border-radius: 50%; animation: bounce 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+.wa-input { background: #1f2c34; padding: 10px 12px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
+.msg-input { flex: 1; background: #2a3942; border: none; border-radius: 20px; padding: 10px 14px; color: #fff; font-family: 'DM Sans',sans-serif; font-size: 13px; outline: none; }
+.msg-input::placeholder { color: #8696a0; }
+.attach { color: #8696a0; font-size: 22px; cursor: pointer; }
+.attach:hover { color: #25D366; }
+.send { width: 40px; height: 40px; background: #25D366; border: none; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.loading { display: none; position: absolute; inset: 0; background: rgba(10,22,40,0.88); border-radius: 20px; align-items: center; justify-content: center; flex-direction: column; gap: 12px; z-index: 10; }
+.loading.on { display: flex; }
+.spinner { width: 38px; height: 38px; border: 3px solid rgba(37,211,102,0.2); border-top-color: #25D366; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to{ transform: rotate(360deg) } }
+.load-txt { color: #25D366; font-size: 13px; }
+.err-bub { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.3); border-radius: 10px; padding: 10px; font-size: 12px; color: #ffaab0; max-width: 85%; }
+
+.upload-zone { width: 100%; max-width: 380px; border: 2px dashed rgba(37,211,102,0.35); border-radius: 14px; padding: 22px; text-align: center; cursor: pointer; position: relative; background: rgba(37,211,102,0.03); margin-bottom: 16px; transition: all .2s; }
+.upload-zone:hover { border-color: #25D366; background: rgba(37,211,102,0.07); }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-icon { font-size: 30px; margin-bottom: 6px; }
+.upload-txt { color: #25D366; font-weight: 600; font-size: 14px; }
+.upload-sub { color: #8696a0; font-size: 11px; margin-top: 4px; }
+
+.stats { display: flex; gap: 8px; width: 100%; max-width: 380px; }
+.stat { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 10px 6px; text-align: center; }
+.stat-n { font-family: 'Syne', sans-serif; font-weight: 700; color: #25D366; font-size: 18px; }
+.stat-l { font-size: 10px; color: #8696a0; margin-top: 2px; }
+
+@keyframes popIn { from{opacity:0;transform:scale(.93)} to{opacity:1;transform:scale(1)} }
+.pop { animation: popIn .25s ease both; }
+</style>
+</head>
+<body>
+
+<div class="api-box">
+  <h2>🔑 Cole sua API Key aqui primeiro!</h2>
+  <p>console.anthropic.com → API Keys → copie a chave (sk-ant-...) e cole abaixo:</p>
+  <div class="api-row">
+    <input class="api-input" id="apiKey" type="password" placeholder="sk-ant-api03-...">
+    <button class="api-btn" onclick="salvarKey()">SALVAR</button>
+  </div>
+  <div class="api-status" id="apiStatus">⚠️ Nenhuma chave salva ainda</div>
+</div>
+
+<div class="hero">
+  <div class="badge"><div class="dot"></div> NutriBot online agora</div>
+  <h1>Nutricionista no<br><span>WhatsApp</span> 24h 🥦</h1>
+  <p class="sub">Mande foto do prato e receba calorias, proteínas, carboidratos e dicas na hora!</p>
+</div>
+
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="loading" id="loadDiv">
+      <div class="spinner"></div>
+      <div class="load-txt" id="loadTxt">Analisando prato...</div>
+    </div>
+    <div class="wa-header">
+      <div class="avatar">🥦</div>
+      <div>
+        <div class="contact-name">NutriBot IA</div>
+        <div class="contact-status">● online agora</div>
+      </div>
+    </div>
+    <div class="chat" id="chat">
+      <div class="date-div"><span>Hoje</span></div>
+      <div class="row in pop">
+        <div class="bubble in">Olá! 👋 Sou o <strong>NutriBot</strong>! Mande uma <strong>foto do seu prato</strong> que analiso na hora: calorias, proteínas e dicas! 🥦</div>
+        <div class="btime">agora</div>
+      </div>
+    </div>
+    <div class="wa-input">
+      <label class="attach" for="fotoInput">📎</label>
+      <input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="handleFoto(event)">
+      <input class="msg-input" id="msgInput" placeholder="Mensagem" onkeydown="if(event.key==='Enter')enviarTexto()">
+      <button class="send" onclick="enviarTexto()">➤</button>
+    </div>
+  </div>
+</div>
+
+<div class="upload-zone">
+  <input type="file" accept="image/*" onchange="handleFoto(event)">
+  <div class="upload-icon">🍽️</div>
+  <div class="upload-txt">Clique aqui ou arraste a foto do prato</div>
+  <div class="upload-sub">JPG, PNG • qualquer tamanho</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n" id="stAna">0</div><div class="stat-l">Análises</div></div>
+  <div class="stat"><div class="stat-n" id="stCal">—</div><div class="stat-l">Última kcal</div></div>
+  <div class="stat"><div class="stat-n" id="stPro">—</div><div class="stat-l">Proteína g</div></div>
+</div>
+
+<script>
+let apiKey = localStorage.getItem('nb_key') || '';
+let count = parseInt(localStorage.getItem('nb_count') || '0');
+document.getElementById('stAna').textContent = count;
+if (apiKey) {
+  document.getElementById('apiKey').value = apiKey;
+  document.getElementById('apiStatus').textContent = '✅ Chave salva! Mande uma foto!';
+  document.getElementById('apiStatus').className = 'api-status ok';
+}
+
+function salvarKey() {
+  const val = document.getElementById('apiKey').value.trim();
+  if (!val) { alert('Cole sua chave primeiro!'); return; }
+  apiKey = val;
+  localStorage.setItem('nb_key', apiKey);
+  document.getElementById('apiStatus').textContent = '✅ Chave salva! Agora mande uma foto do prato!';
+  document.getElementById('apiStatus').className = 'api-status ok';
+}
+
+function agora() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+
+function addBubble(html, tipo) {
+  const chat = document.getElementById('chat');
+  const r = document.createElement('div');
+  r.className = 'row ' + tipo + ' pop';
+  r.innerHTML = '<div class="bubble ' + tipo + '">' + html + '</div><div class="btime">' + agora() + '</div>';
+  chat.appendChild(r);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function mostrarTyping() {
+  const chat = document.getElementById('chat');
+  const el = document.createElement('div');
+  el.className = 'row in pop'; el.id = 'typing';
+  el.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removerTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
+
+function enviarTexto() {
+  const inp = document.getElementById('msgInput');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  addBubble(msg, 'out');
+  setTimeout(() => {
+    mostrarTyping();
+    setTimeout(() => { removerTyping(); addBubble('📸 Me manda uma foto do prato usando o clipe 📎 ou a área verde abaixo!', 'in'); }, 1000);
+  }, 300);
+}
+
+async function handleFoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+
+  if (!apiKey) {
+    addBubble('⚠️ Salva sua <strong>API Key</strong> no campo verde lá em cima primeiro! 👆', 'in');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64full = e.target.result;
+    const base64 = base64full.split(',')[1];
+    const mime = file.type || 'image/jpeg';
+
+    const chat = document.getElementById('chat');
+    const imgRow = document.createElement('div');
+    imgRow.className = 'row out pop';
+    imgRow.innerHTML = '<div class="img-bub"><img src="' + base64full + '" alt="prato"><div class="img-cap">📷 meu prato</div></div><div class="btime">' + agora() + '</div>';
+    chat.appendChild(imgRow);
+    chat.scrollTop = chat.scrollHeight;
+
+    const loadDiv = document.getElementById('loadDiv');
+    loadDiv.classList.add('on');
+    const textos = ['Identificando os alimentos...','Calculando calorias...','Analisando macronutrientes...','Gerando dicas...'];
+    let ti = 0;
+    const tInterval = setInterval(() => { ti=(ti+1)%textos.length; document.getElementById('loadTxt').textContent=textos[ti]; }, 1800);
+
+    try {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, mimeType: mime, apiKey: apiKey })
+      });
+
+      clearInterval(tInterval);
+      loadDiv.classList.remove('on');
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ' + res.status);
+
+      let txt = data.content.map(function(b){ return b.text || ''; }).join('').replace(/```json|```/g,'').trim();
+      
+      // Extrair JSON mesmo se vier com texto extra
+      const jsonMatch = txt.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Resposta invalida da IA');
+      const r = JSON.parse(jsonMatch[0]);
+
+      count++;
+      localStorage.setItem('nb_count', count);
+      document.getElementById('stAna').textContent = count;
+      document.getElementById('stCal').textContent = r.calorias;
+      document.getElementById('stPro').textContent = r.proteinas + 'g';
+
+      const emojis = {otimo:'🟢',bom:'🟡',moderado:'🟠',evitar:'🔴'};
+      addBubble((emojis[r.avaliacao] || '⚪') + ' <strong>' + r.prato + '</strong> identificado! Veja a análise 👇', 'in');
+
+      const ingHtml = (r.ingredientes || []).map(function(i){ return '<strong>' + i.nome + '</strong> ' + i.porcao + ' — ' + i.kcal + ' kcal'; }).join('<br>');
+
+      setTimeout(function() {
+        mostrarTyping();
+        setTimeout(function() {
+          removerTyping();
+          const cardRow = document.createElement('div');
+          cardRow.className = 'row in pop';
+          cardRow.innerHTML = '<div class="card">' +
+            '<div class="card-title">🔬 Análise Nutricional Completa</div>' +
+            '<div class="cal-box"><div class="cal-num">' + r.calorias + '</div><div class="cal-lbl">kcal totais estimadas</div></div>' +
+            '<div class="macros">' +
+              '<div class="mac"><div class="mac-val" style="color:#4fc3f7">' + r.proteinas + 'g</div><div class="mac-lbl">Proteínas</div></div>' +
+              '<div class="mac"><div class="mac-val" style="color:#FFD93D">' + r.carboidratos + 'g</div><div class="mac-lbl">Carboidratos</div></div>' +
+              '<div class="mac"><div class="mac-val" style="color:#FF6B35">' + r.gorduras + 'g</div><div class="mac-lbl">Gorduras</div></div>' +
+              '<div class="mac"><div class="mac-val" style="color:#a5d6a7">' + r.fibras + 'g</div><div class="mac-lbl">Fibras</div></div>' +
+            '</div>' +
+            (ingHtml ? '<div class="items">' + ingHtml + '</div>' : '') +
+            '<div class="tip">💡 ' + r.dica + '</div>' +
+            '</div><div class="btime">' + agora() + '</div>';
+          document.getElementById('chat').appendChild(cardRow);
+          document.getElementById('chat').scrollTop = 99999;
+        }, 900);
+      }, 500);
+
+    } catch(err) {
+      clearInterval(tInterval);
+      loadDiv.classList.remove('on');
+      removerTyping();
+      const msg = err.message.includes('401') ? '🔑 API Key inválida! Verifique no campo verde acima.' : '❌ Erro: ' + err.message;
+      const errRow = document.createElement('div');
+      errRow.className = 'row in pop';
+      errRow.innerHTML = '<div class="err-bub">' + msg + '</div>';
+      document.getElementById('chat').appendChild(errRow);
+      document.getElementById('chat').scrollTop = 99999;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+</body>
+</html>
