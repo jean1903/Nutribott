@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
+        max_tokens: 2000,
         messages: [{
           role: 'user',
           content: [
@@ -32,7 +32,38 @@ export default async function handler(req, res) {
             },
             {
               type: 'text',
-              text: 'Voce e nutricionista. Analise esta foto de prato. Responda SOMENTE JSON sem texto fora, sem markdown: {"prato":"nome","calorias":000,"proteinas":00,"carboidratos":00,"gorduras":00,"fibras":0,"ingredientes":[{"nome":"item","porcao":"100g","kcal":000}],"avaliacao":"otimo","dica":"dica motivadora curta em portugues"}'
+              text: `Voce e um nutricionista especialista com visao aguçada. Analise ABSOLUTAMENTE TODOS os alimentos visiveis nesta foto com maximo de detalhes.
+
+REGRAS IMPORTANTES:
+- Identifique CADA ingrediente separadamente: carnes, graos, verduras, legumes, molhos, temperos, acompanhamentos, bebidas, tudo
+- Estime as porcoes em gramas baseado no tamanho visual do prato
+- Calcule as calorias de CADA ingrediente separadamente
+- A soma das calorias dos ingredientes deve ser igual ao total de calorias do prato
+- Seja preciso e detalhado como um nutricionista real faria
+
+Responda SOMENTE JSON sem texto fora, sem markdown, sem explicacoes extras:
+{
+  "prato": "nome completo detalhado do prato",
+  "calorias": 000,
+  "proteinas": 00,
+  "carboidratos": 00,
+  "gorduras": 00,
+  "fibras": 0,
+  "sodio": 000,
+  "ingredientes": [
+    {
+      "nome": "nome do ingrediente",
+      "porcao": "000g",
+      "kcal": 000,
+      "proteinas": 0,
+      "carboidratos": 0,
+      "gorduras": 0
+    }
+  ],
+  "avaliacao": "otimo ou bom ou moderado ou evitar",
+  "indice_saciedade": "alto ou medio ou baixo",
+  "dica": "dica nutricional detalhada e motivadora em portugues brasileiro"
+}`
             }
           ]
         }]
