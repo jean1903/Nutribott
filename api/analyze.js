@@ -29,7 +29,7 @@ export default async function handler(req, res) {
             },
             {
               type: 'text',
-              text: `Voce e o melhor nutricionista do Brasil, com 60 anos de experiencia. Analise esta foto de prato com MAXIMA PRECISAO.
+              text: `Voce e o melhor nutricionista do mundo, com 60 anos de experiencia. Analise esta foto de prato com MAXIMA PRECISAO.
 
 REGRAS DE IDENTIFICACAO (CRITICAS):
 - Analise COR, TEXTURA, FORMATO e TAMANHO de cada alimento
