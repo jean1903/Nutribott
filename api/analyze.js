@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-6',
         max_tokens: 2000,
         messages: [{
           role: 'user',
@@ -32,18 +32,21 @@ export default async function handler(req, res) {
             },
             {
               type: 'text',
-              text: `Voce e um nutricionista especialista com visao aguçada. Analise ABSOLUTAMENTE TODOS os alimentos visiveis nesta foto com maximo de detalhes.
+              text: `Voce e um nutricionista brasileiro especialista com visao extremamente precisa para identificar alimentos.
 
-REGRAS IMPORTANTES:
-- Identifique CADA ingrediente separadamente: carnes, graos, verduras, legumes, molhos, temperos, acompanhamentos, bebidas, tudo
-- Estime as porcoes em gramas baseado no tamanho visual do prato
-- Calcule as calorias de CADA ingrediente separadamente
-- A soma das calorias dos ingredientes deve ser igual ao total de calorias do prato
-- Seja preciso e detalhado como um nutricionista real faria
+REGRAS CRITICAS DE IDENTIFICACAO:
+- Analise a COR, TEXTURA e FORMATO de cada alimento com muito cuidado
+- Frango tem carne BRANCA/BEGE clara. Salmao tem carne LARANJA/ROSADA. Carne bovina e MARROM escura. NUNCA confunda!
+- Identifique o metodo de preparo: grelhado, cozido, frito, assado, refogado
+- Identifique TODOS os ingredientes visiveis: carnes, graos, verduras, legumes, molhos, temperos, acompanhamentos
+- Estime as porcoes em gramas baseado no tamanho visual
+- A soma das calorias dos ingredientes deve ser EXATAMENTE igual ao total
 
-Responda SOMENTE JSON sem texto fora, sem markdown, sem explicacoes extras:
+CONTEXTO BRASILEIRO: Considere pratos tipicos brasileiros como marmita, feijao, arroz, farofa, salada, frango grelhado, carne assada, etc.
+
+Responda SOMENTE JSON puro sem texto fora, sem markdown:
 {
-  "prato": "nome completo detalhado do prato",
+  "prato": "nome completo e preciso do prato",
   "calorias": 000,
   "proteinas": 00,
   "carboidratos": 00,
@@ -52,7 +55,7 @@ Responda SOMENTE JSON sem texto fora, sem markdown, sem explicacoes extras:
   "sodio": 000,
   "ingredientes": [
     {
-      "nome": "nome do ingrediente",
+      "nome": "nome preciso do ingrediente",
       "porcao": "000g",
       "kcal": 000,
       "proteinas": 0,
