@@ -8,10 +8,7 @@ export default async function handler(req, res) {
 
   try {
     const { imageBase64, mimeType, apiKey } = req.body;
-
-    if (!imageBase64 || !apiKey) {
-      return res.status(400).json({ error: 'imageBase64 e apiKey sao obrigatorios' });
-    }
+    if (!imageBase64 || !apiKey) return res.status(400).json({ error: 'Dados obrigatorios ausentes' });
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -32,17 +29,25 @@ export default async function handler(req, res) {
             },
             {
               type: 'text',
-              text: `Voce e um nutricionista brasileiro especialista com visao extremamente precisa para identificar alimentos.
+              text: `Voce e o melhor nutricionista do Brasil, com 60 anos de experiencia. Analise esta foto de prato com MAXIMA PRECISAO.
 
-REGRAS CRITICAS DE IDENTIFICACAO:
-- Analise a COR, TEXTURA e FORMATO de cada alimento com muito cuidado
-- Frango tem carne BRANCA/BEGE clara. Salmao tem carne LARANJA/ROSADA. Carne bovina e MARROM escura. NUNCA confunda!
-- Identifique o metodo de preparo: grelhado, cozido, frito, assado, refogado
-- Identifique TODOS os ingredientes visiveis: carnes, graos, verduras, legumes, molhos, temperos, acompanhamentos
-- Estime as porcoes em gramas baseado no tamanho visual
-- A soma das calorias dos ingredientes deve ser EXATAMENTE igual ao total
+REGRAS DE IDENTIFICACAO (CRITICAS):
+- Analise COR, TEXTURA, FORMATO e TAMANHO de cada alimento
+- FRANGO: carne BRANCA/BEGE, textura fibrosa. NUNCA confunda com peixe
+- SALMON/PEIXE: carne LARANJA/ROSADA ou BRANCA com escamas
+- CARNE BOVINA: MARROM escura, textura densa
+- ARROZ: graos BRANCOS pequenos
+- FEIJAO: graos ESCUROS/PRETOS/MARRONS
+- Para ESTIMAR PORCOES: considere que um prato normal tem 25-30cm de diametro. Use isso como referencia de tamanho
+- Seja CONSERVADOR nas porcoes — errar pra menos e melhor que errar pra mais
+- Considere preparos tipicos BRASILEIROS: marmita, quentinha, feijao tropeiro, arroz branco, frango grelhado, carne assada, salada
 
-CONTEXTO BRASILEIRO: Considere pratos tipicos brasileiros como marmita, feijao, arroz, farofa, salada, frango grelhado, carne assada, etc.
+ANALISE PERSONALIZADA DO PRATO:
+- Se calorias > 700: alerta de prato calorico, sugira reducoes especificas
+- Se proteinas < 25g: sugira como aumentar proteina
+- Se carboidratos > 80g: sugira reduzir porcao de arroz/massa
+- Se o prato for equilibrado: elogie e reforce o comportamento
+- Sempre sugira 1 substituicao pratica e 1 adicao saudavel especifica para ESTE prato
 
 Responda SOMENTE JSON puro sem texto fora, sem markdown:
 {
@@ -64,8 +69,12 @@ Responda SOMENTE JSON puro sem texto fora, sem markdown:
     }
   ],
   "avaliacao": "otimo ou bom ou moderado ou evitar",
+  "nota_prato": 0,
+  "analise_detalhada": "analise completa do prato em 2-3 frases: o que esta bom, o que pode melhorar, como esse prato impacta os objetivos de saude",
+  "sugestao_reducao": "o que reduzir neste prato especifico e quanto ex: reduza o arroz de 300g para 150g economizando 150 kcal",
+  "sugestao_adicao": "o que adicionar para melhorar ex: adicione 1 concha de feijao para aumentar fibras e proteinas",
   "indice_saciedade": "alto ou medio ou baixo",
-  "dica": "dica nutricional detalhada e motivadora em portugues brasileiro"
+  "dica": "mensagem motivadora e personalizada para este prato especifico em portugues brasileiro"
 }`
             }
           ]
@@ -74,11 +83,7 @@ Responda SOMENTE JSON puro sem texto fora, sem markdown:
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({ error: data.error?.message || 'Erro na API Anthropic' });
-    }
-
+    if (!response.ok) return res.status(response.status).json({ error: data.error?.message || 'Erro na API' });
     return res.status(200).json(data);
 
   } catch (err) {
